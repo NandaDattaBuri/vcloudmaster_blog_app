@@ -180,24 +180,39 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
       console.log("- removeImage:", removeImage);
       
       // Handle image upload/update/removal
+
       if (removeImage) {
-        // Send empty string to remove image
+
         formDataToSend.append('coverImage', '');
-        console.log("Removing cover image");
+      
       } else if (formData.useImageUrl && formData.imageUrl.trim()) {
-        // Send URL as coverImage field
-        formDataToSend.append('coverImage', formData.imageUrl);
-        console.log("Using image URL as 'coverImage'");
+
+        // ✅ Send URL under 'imageUrl' — matches what backend destructures
+
+        formDataToSend.append('imageUrl', formData.imageUrl);  // was 'coverImage'
+      
       } else if (formData.coverImage) {
-        // This will be handled as req.file by multer
+
+        // File upload stays as 'coverImage' — multer reads req.file
+
         formDataToSend.append('coverImage', formData.coverImage);
-        console.log("Uploading file as 'coverImage'");
+      
+      } else if (isEditing && initialData.coverImage && !formData.coverImage && !removeImage) {
+
+        // Keeping existing image — send as 'imageUrl' if it's a URL
+
+        if (initialData.coverImage.startsWith('http')) {
+
+          formDataToSend.append('imageUrl', initialData.coverImage); // ✅
+
+        } else {
+
+          formDataToSend.append('coverImage', initialData.coverImage);
+
+        }
+
       }
-      // If editing and no new image provided and not removing, send existing URL
-      else if (isEditing && initialData.coverImage && !formData.useImageUrl && !formData.coverImage && !removeImage) {
-        formDataToSend.append('coverImage', initialData.coverImage);
-        console.log("Keeping existing image as 'coverImage':", initialData.coverImage);
-      }
+ 
       
       // Log FormData contents
       console.log("FormData entries:");
