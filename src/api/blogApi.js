@@ -39,7 +39,7 @@ export const fetchBlogById = (id) => API.get(`/${id}`);
 
 // Create new blog (protected - requires auth)
 export const createBlog = (formData) => {
-  return API.post("", formData);
+  return API.post("/", formData);
 };
 
 // Update blog (protected - requires auth)
@@ -58,4 +58,5 @@ export const login = (email, password) => {
     email,
     password
   });
+
 };
