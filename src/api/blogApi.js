@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://blogbackend-yq0v.onrender.com/api",
+  baseURL: "https://blogbackend-yq0v.onrender.com/api/post",
 });
 
 // Add request interceptor to include token for protected routes
@@ -32,24 +32,24 @@ API.interceptors.request.use(
 );
 
 // Get all blogs (public - no auth needed)
-export const fetchAllBlogs = () => API.get("/post/all");
+export const fetchAllBlogs = () => API.get("/all");
 
 // Get single blog (public - no auth needed)
-export const fetchBlogById = (id) => API.get(`/post/${id}`);
+export const fetchBlogById = (id) => API.get(`/${id}`);
 
 // Create new blog (protected - requires auth)
 export const createBlog = (formData) => {
-  return API.post("/post", formData);
+  return API.post("/create", formData);
 };
 
 // Update blog (protected - requires auth)
 export const updateBlog = (id, formData) => {
-  return API.put(`/post/${id}`, formData);
+  return API.put(`/${id}`, formData);
 };
 
 // Delete blog (protected - requires auth)
 export const deleteBlog = (id) => {
-  return API.delete(`/post/${id}`);
+  return API.delete(`/${id}`);
 };
 
 // Simple login function
