@@ -76,24 +76,33 @@ const Register = () => {
         password: formData.password,
       };
       
-      const response = await register(userData);
+      // NEW: Use the new API format
+      const result = await register(userData);
       
-      // Store user data
-      const userResponse = {
-        ...response.data.user,
-        token: response.data.token
-      };
-      setUser(userResponse);
+      console.log("Registration result:", result);
       
-      setAlert({
-        type: 'success',
-        message: 'Registration successful! Welcome to BlogApp.'
-      });
-      
-      // Redirect to dashboard after 1.5 seconds
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 1500);
+      // Check if registration was successful
+      if (result.success) {
+        // Store user data
+        setUser(result.user);
+        
+        setAlert({
+          type: 'success',
+          message: 'Registration successful! Welcome to BlogApp.'
+        });
+        
+        // Redirect to dashboard after 1.5 seconds
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1500);
+        
+      } else {
+        // Registration failed
+        setAlert({
+          type: 'error',
+          message: result.error || 'Registration failed. Please try again.'
+        });
+      }
       
     } catch (err) {
       console.error('Registration error:', err);
