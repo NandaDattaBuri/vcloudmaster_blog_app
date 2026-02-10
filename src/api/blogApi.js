@@ -3,7 +3,9 @@ import axios from "axios";
 const API = axios.create({
   baseURL: "https://blogbackend-yq0v.onrender.com/api/post",
 });
-
+const APIS = axios.create({
+  baseURL: "https://blogbackend-yq0v.onrender.com/api",
+});
 // Add request interceptor to include token for protected routes
 API.interceptors.request.use(
   (config) => {
@@ -39,7 +41,7 @@ export const fetchBlogById = (id) => API.get(`/${id}`);
 
 // Create new blog (protected - requires auth)
 export const createBlog = (formData) => {
-  return API.post("/", formData);
+  return APIS.post("/post", formData);
 };
 
 // Update blog (protected - requires auth)
@@ -60,3 +62,4 @@ export const login = (email, password) => {
   });
 
 };
+
