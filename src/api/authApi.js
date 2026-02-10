@@ -5,79 +5,75 @@ const API = axios.create({
   baseURL: "https://blogbackend-yq0v.onrender.com/api/admin",
 });
 
+// Add request interceptor to include token for all requests
+API.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // Login User
 export const login = async (email, password) => {
   try {
-    console.log("Attempting login to:", `${API.defaults.baseURL}/login`);
-    console.log("With credentials:", { email });
+    console.log("Attempting login with email:", email);
     
-    const response = await API.post("/login", { 
-      email, 
-      password 
-    });
+    const response = await API.post("/login", { email, password });
     
-    console.log("Login API Full Response:", response);
-    console.log("Login API Data:", response.data);
+    console.log("Login response received:", response.data);
     
-    // Store the token in localStorage if received
-    if (response.data.token) {
-      localStorage.setItem("token", response.data.token);
-      
-      // Store user data - based on the structure you showed
-      let userData = {};
-      
-      if (response.data.user) {
-        // Structure: { token, user: { name, email, _id } }
-        userData = response.data.user;
-      } else if (response.data.name && response.data.email && response.data._id) {
-        // Structure: { token, name, email, _id }
-        userData = {
-          name: response.data.name,
-          email: response.data.email,
-          _id: response.data._id,
-          ...response.data
-        };
-        // Remove token from userData if it's there
-        delete userData.token;
-      } else {
-        // Fallback: create basic user object
-        userData = {
-          name: email.split('@')[0],
-          email: email
-        };
-      }
-      
-      localStorage.setItem("user", JSON.stringify(userData));
-      console.log("User data saved to localStorage:", userData);
-      console.log("Token saved:", response.data.token.substring(0, 20) + "...");
-      
-      // Verify storage
-      const storedToken = localStorage.getItem("token");
-      const storedUser = localStorage.getItem("user");
-      console.log("Verification - Stored token exists:", !!storedToken);
-      console.log("Verification - Stored user exists:", !!storedUser);
-      if (storedUser) {
-        console.log("Verification - Parsed user:", JSON.parse(storedUser));
-      }
+    // Extract token and user from response
+    const token = response.data.token;
+    let user = null;
+    
+    if (response.data.user) {
+      // Format: { token, user: { ... } }
+      user = response.data.user;
+    } else if (response.data._id) {
+      // Format: { token, _id, name, email, ... }
+      user = {
+        _id: response.data._id,
+        name: response.data.name,
+        email: response.data.email
+      };
     } else {
-      console.error("No token received in response!");
-      console.error("Full response data:", response.data);
+      // Create basic user object
+      user = {
+        name: email.split('@')[0],
+        email: email
+      };
     }
     
-    return response.data;
+    // Store in localStorage
+    if (token) {
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      console.log("✅ Login successful - Token and user stored");
+    } else {
+      console.error("❌ No token in response");
+    }
+    
+    // Return consistent format
+    return {
+      success: true,
+      user,
+      token
+    };
+    
   } catch (error) {
-    console.error("Login error details:", {
+    console.error("Login failed:", {
       status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data,
-      message: error.message,
-      config: {
-        url: error.config?.url,
-        method: error.config?.method,
-        data: error.config?.data
-      }
+      message: error.response?.data?.message || error.message
     });
-    throw error;
+    
+    return {
+      success: false,
+      error: error.response?.data?.message || "Login failed"
+    };
   }
 };
 
@@ -88,87 +84,141 @@ export const register = async (formData) => {
     
     const response = await API.post("/register", formData);
     
-    console.log("Registration API Response:", response.data);
+    console.log("Registration response:", response.data);
     
-    // If registration includes auto-login, store token
-    if (response.data.token) {
-      localStorage.setItem("token", response.data.token);
-      
-      let userData = {};
-      if (response.data.user) {
-        userData = response.data.user;
-      } else if (response.data.name && response.data.email) {
-        userData = {
-          name: response.data.name,
-          email: response.data.email,
-          _id: response.data._id,
-          ...response.data
-        };
-        delete userData.token;
-      } else {
-        userData = {
-          name: formData.name || formData.email.split('@')[0],
-          email: formData.email
-        };
-      }
-      
-      localStorage.setItem("user", JSON.stringify(userData));
-      console.log("User registered and logged in:", userData);
+    // Extract token and user from response
+    const token = response.data.token;
+    let user = null;
+    
+    if (response.data.user) {
+      // Format: { token, user: { ... } }
+      user = response.data.user;
+    } else if (response.data._id) {
+      // Format: { token, _id, name, email, ... }
+      user = {
+        _id: response.data._id,
+        name: response.data.name,
+        email: response.data.email
+      };
+    } else {
+      // Create user from form data
+      user = {
+        name: formData.name || formData.email.split('@')[0],
+        email: formData.email
+      };
     }
     
-    return response.data;
+    // Store in localStorage
+    if (token) {
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      console.log("✅ Registration successful - Token and user stored");
+    }
+    
+    // Return consistent format
+    return {
+      success: true,
+      user,
+      token
+    };
+    
   } catch (error) {
-    console.error("Registration error:", {
+    console.error("Registration failed:", {
       status: error.response?.status,
-      data: error.response?.data,
-      message: error.message
+      message: error.response?.data?.message || error.message
     });
-    throw error;
+    
+    return {
+      success: false,
+      error: error.response?.data?.message || "Registration failed"
+    };
   }
 };
 
-// Logout (client-side only)
+// Logout
 export const logout = () => {
-  console.log("Logging out...");
   localStorage.removeItem("token");
   localStorage.removeItem("user");
-  console.log("LocalStorage cleared");
+  console.log("✅ Logged out");
 };
 
 // Check if user is authenticated
 export const isAuthenticated = () => {
   const token = localStorage.getItem("token");
-  const isAuth = token !== null && token !== undefined && token !== "";
-  console.log("isAuthenticated check:", { hasToken: !!token, isAuth });
-  return isAuth;
+  const hasToken = token && token.trim() !== "";
+  
+  // Optional: Also check if token is valid (not expired)
+  if (hasToken) {
+    // You could add JWT expiration check here
+    return true;
+  }
+  
+  return false;
 };
 
 // Get current user
 export const getCurrentUser = () => {
   try {
-    const user = localStorage.getItem("user");
-    if (user) {
-      const parsedUser = JSON.parse(user);
-      console.log("getCurrentUser returning:", parsedUser);
-      return parsedUser;
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      return JSON.parse(userStr);
     }
-    console.log("getCurrentUser: No user found in localStorage");
     return null;
   } catch (error) {
-    console.error("Error parsing user data:", error);
+    console.error("Error getting current user:", error);
     return null;
   }
 };
 
 // Get token
 export const getToken = () => {
-  const token = localStorage.getItem("token");
-  console.log("getToken returning:", token ? token.substring(0, 20) + "..." : "No token");
-  return token;
+  return localStorage.getItem("token");
 };
 
-// // Clear all auth data (for debugging)
-// export const clearAuth = () => {
-//   localStorage.clear();
-//   console.log("All localStorage cleared");
-// };
+// Verify auth status
+export const verifyAuth = () => {
+  const token = getToken();
+  const user = getCurrentUser();
+  
+  console.log("Auth verification:", {
+    hasToken: !!token,
+    hasUser: !!user,
+    user: user
+  });
+  
+  return {
+    isAuthenticated: isAuthenticated(),
+    user,
+    token
+  };
+};
+
+// Clear all auth data (for debugging)
+export const clearAuth = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  console.log("Auth data cleared");
+};
+
+// Test authentication
+export const testAuth = async () => {
+  console.log("=== AUTH TEST ===");
+  console.log("1. Current token:", getToken()?.substring(0, 20) + "...");
+  console.log("2. Current user:", getCurrentUser());
+  console.log("3. Is authenticated:", isAuthenticated());
+  console.log("=== END TEST ===");
+};
+
+// Auto-clear expired tokens (optional)
+const cleanupExpiredAuth = () => {
+  // You can implement JWT expiration check here
+  const token = getToken();
+  if (token) {
+    // Check if token is expired
+    // If expired, clear auth data
+    // logout();
+  }
+};
+
+// Run cleanup on import
+cleanupExpiredAuth();
