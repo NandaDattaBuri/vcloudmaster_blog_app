@@ -189,7 +189,7 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
 
         // ✅ Send URL under 'imageUrl' — matches what backend destructures
 
-        formDataToSend.append('imageUrl', formData.imageUrl);  // was 'coverImage'
+        formDataToSend.append('coverImage', formData.imageUrl);  // was 'coverImage'
       
       } else if (formData.coverImage) {
 
@@ -203,7 +203,7 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
 
         if (initialData.coverImage.startsWith('http')) {
 
-          formDataToSend.append('imageUrl', initialData.coverImage); // ✅
+          formDataToSend.append('coverImage', initialData.coverImage); // ✅
 
         } else {
 
@@ -531,3 +531,4 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
 };
 
 export default BlogForm; 
+
