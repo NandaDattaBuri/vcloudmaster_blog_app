@@ -14,7 +14,7 @@ const CreateBlog = () => {
       setError('');
       
       // Check if user is logged in
-      const user = JSON.parse(localStorage.getItem('profile'));
+      const user = JSON.parse(localStorage.getItem('user'));
       if (!user || !user.token) {
         setError('Please log in to create a blog post');
         navigate('/login'); // Redirect to login
@@ -72,5 +72,6 @@ const CreateBlog = () => {
     </div>
   );
 };
+
 
 export default CreateBlog;
