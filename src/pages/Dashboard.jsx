@@ -483,7 +483,6 @@ const Dashboard = () => {
                           </button>
                           <Link
                             to={`/blog/${blog._id}`}
-                            target="_blank"
                             className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-medium"
                           >
                             View
@@ -601,5 +600,6 @@ const Dashboard = () => {
     </div>
   );
 };
+
 
 export default Dashboard;
