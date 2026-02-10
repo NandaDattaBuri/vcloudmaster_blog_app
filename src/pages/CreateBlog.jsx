@@ -8,34 +8,32 @@ const CreateBlog = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (formData) => {
-    try {
-      setIsSubmitting(true);
-      setError('');
-      
-      // Check if user is logged in
-      const user = JSON.parse(localStorage.getItem('profile'));
-      if (!user || !user.token) {
-        setError('Please log in to create a blog post');
-        navigate('/login'); // Redirect to login
-        return;
-      }
-      
-      const response = await createBlog(formData);
-      console.log('Blog created successfully:', response.data);
-      
-      // Navigate back to dashboard
-      navigate('/dashboard', { 
-        state: { message: 'Blog post created successfully!' }
-      });
-      
-    } catch (err) {
-      console.error('Error creating blog:', err);
-      setError(err.response?.data?.message || 'Failed to create blog post');
-    } finally {
-      setIsSubmitting(false);
+const handleSubmit = async (formData) => {
+  try {
+    setIsSubmitting(true);
+    setError('');
+    
+    // ✅ FIXED - matches what adminApi.js stores
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('Please log in to create a blog post');
+      navigate('/login');
+      return;
     }
-  };
+    
+    const response = await createBlog(formData);
+    console.log('Blog created successfully:', response.data);
+    navigate('/dashboard', { 
+      state: { message: 'Blog post created successfully!' }
+    });
+    
+  } catch (err) {
+    console.error('Error creating blog:', err);
+    setError(err.response?.data?.message || 'Failed to create blog post');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -75,4 +73,5 @@ const CreateBlog = () => {
 
 
 export default CreateBlog;
+
 
