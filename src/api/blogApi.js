@@ -54,8 +54,9 @@ export const deleteBlog = (id) => {
 
 // Simple login function
 export const login = (email, password) => {
-  return axios.post("https://blogbackend-yq0v.onrender.com/api/auth/login", {
+  return axios.post("https://blogbackend-yq0v.onrender.com/api/admin/login", {
     email,
     password
   });
 };
+
