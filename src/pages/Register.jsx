@@ -88,12 +88,12 @@ const Register = () => {
         
         setAlert({
           type: 'success',
-          message: 'Registration successful! Welcome to BlogApp.'
+          message: 'Registration successful! Please login to continue.'
         });
         
         // Redirect to dashboard after 1.5 seconds
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate('/login');
         }, 1500);
         
       } else {
@@ -223,3 +223,4 @@ const Register = () => {
 };
 
 export default Register;
+
