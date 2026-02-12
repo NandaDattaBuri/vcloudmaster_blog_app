@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { fetchBlogById } from '../api/blogApi';
 import { format } from 'date-fns';
 
@@ -37,6 +37,17 @@ const BlogPost = () => {
     }
   };
 
+  const handleEditClick = () => {
+    // Navigate to dashboard with state to open the edit modal
+    navigate('/dashboard', { 
+      state: { 
+        openEditModal: true, 
+        editBlogId: id,
+        blogData: blog // Pass the entire blog data
+      } 
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -48,7 +59,7 @@ const BlogPost = () => {
     );
   }
 
-  if (error) {
+  if (error || !blog) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-md">
@@ -57,7 +68,7 @@ const BlogPost = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Blog Not Found</h2>
-            <p className="text-gray-600 mb-6">{error}</p>
+            <p className="text-gray-600 mb-6">{error || 'Blog post does not exist.'}</p>
             <button
               onClick={() => navigate('/dashboard')}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
@@ -130,7 +141,7 @@ const BlogPost = () => {
                   </div>
                   
                   <div className="flex items-center text-gray-600">
-                    <svg className="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg className="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"></path>
                     </svg>
                     <span className="font-medium">{blog.dislikes || 0} Dislikes</span>
@@ -166,7 +177,7 @@ const BlogPost = () => {
               </div>
             )}
 
-            {/* Action Buttons */}
+            {/* Action Buttons - UPDATED */}
             <div className="mt-12 pt-8 border-t border-gray-200 flex justify-between items-center">
               <button
                 onClick={() => navigate('/dashboard')}
@@ -179,25 +190,16 @@ const BlogPost = () => {
               </button>
               
               <div className="flex space-x-4">
-                {/* <button
-                  onClick={() => window.print()}
-                  className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium flex items-center"
-                >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                  </svg>
-                  Print
-                </button> */}
-                
-                <Link
-                  to={`/edit-blog/${id}`}
+                {/* REPLACED Link with Button */}
+                <button
+                  onClick={handleEditClick}
                   className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center"
                 >
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                   </svg>
                   Edit Post
-                </Link>
+                </button>
               </div>
             </div>
           </div>
