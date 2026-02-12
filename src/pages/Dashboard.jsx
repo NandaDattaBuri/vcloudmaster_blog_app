@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { fetchAllBlogs, deleteBlog, updateBlog, createBlog } from '../api/blogApi';
 import { logout, isAuthenticated } from '../api/authApi';
 import BlogForm from '../components/blog/BlogForm';
@@ -17,6 +17,7 @@ const Dashboard = () => {
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
   const postsPerPage = 10;
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Get current user from localStorage
   const getUser = () => {
@@ -36,6 +37,32 @@ const Dashboard = () => {
     console.log("User is authenticated, token:", localStorage.getItem("token"));
     fetchBlogs();
   }, [navigate]);
+
+  // NEW: Handle edit modal from navigation state (from BlogPost)
+  useEffect(() => {
+    // Check if we should open edit modal from navigation state
+    if (location.state?.openEditModal && location.state?.editBlogId) {
+      // First, make sure we have the blogs loaded
+      if (blogs.length > 0) {
+        // Find the blog from your blogs array
+        const blogToEdit = blogs.find(b => b._id === location.state.editBlogId);
+        if (blogToEdit) {
+          setEditingBlog(blogToEdit);
+          setShowEditModal(true);
+          
+          // Clear the state to prevent reopening on refresh or back navigation
+          navigate('/dashboard', { replace: true, state: {} });
+        }
+      } else if (location.state?.blogData) {
+        // If we have the blog data directly from the navigation state
+        setEditingBlog(location.state.blogData);
+        setShowEditModal(true);
+        
+        // Clear the state
+        navigate('/dashboard', { replace: true, state: {} });
+      }
+    }
+  }, [location.state, blogs, navigate]);
 
   useEffect(() => {
     // Filter blogs based on search term
@@ -107,7 +134,7 @@ const Dashboard = () => {
       showNotification('Blog updated successfully!', 'success');
       setEditingBlog(null);
       setShowEditModal(false);
-      fetchBlogs();
+      await fetchBlogs(); // Refresh the blog list
     } catch (error) {
       console.error('Error updating blog:', error);
       if (error.response?.status === 401) {
@@ -301,17 +328,17 @@ const Dashboard = () => {
         </div>
 
         <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-red-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm font-medium">Total Dislikes</p>
-                <h3 className="text-3xl font-bold text-gray-800 mt-2">{totalDislikes}</h3>
-              </div>
-              <div className="bg-red-100 p-3 rounded-full">
-                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"></path>
-                </svg>
-              </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-500 text-sm font-medium">Total Dislikes</p>
+              <h3 className="text-3xl font-bold text-gray-800 mt-2">{totalDislikes}</h3>
             </div>
+            <div className="bg-red-100 p-3 rounded-full">
+              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"></path>
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -454,9 +481,9 @@ const Dashboard = () => {
                             <span className="text-sm">{blog.likes || 0} likes</span>
                           </div>
                           <div className="flex items-center text-gray-600">
-                           <svg className="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"></path>
-                          </svg>
+                            <svg className="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"></path>
+                            </svg>
                             <span className="text-sm">{blog.dislikes|| 0} Dislikes</span>
                           </div>
                           <div className="flex items-center text-gray-600">
@@ -600,6 +627,5 @@ const Dashboard = () => {
     </div>
   );
 };
-
 
 export default Dashboard;
