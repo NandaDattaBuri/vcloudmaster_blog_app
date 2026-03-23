@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Input from '../common/Input';
 import Button from '../common/Button';
 import ImageUpload from './ImageUpload';
+import BlogEditor from './BlogEditor';
 
 const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
   const [formData, setFormData] = useState({
@@ -14,7 +15,7 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
   });
 
   const [errors, setErrors] = useState({});
-  const [key, setKey] = useState(0); 
+  const [key, setKey] = useState(0);
   const [removeImage, setRemoveImage] = useState(false);
 
   // Initialize form data when editing
@@ -22,23 +23,23 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
     if (isEditing && initialData) {
       console.log("🔄 Initializing edit form for blog:", initialData._id);
       console.log("Existing coverImage:", initialData.coverImage);
-      
+
       // Check if existing image is a URL
-      const hasExistingImage = initialData.coverImage && 
-                              (initialData.coverImage.startsWith('http') || 
-                               initialData.coverImage.startsWith('https'));
-      
+      const hasExistingImage = initialData.coverImage &&
+        (initialData.coverImage.startsWith('http') ||
+          initialData.coverImage.startsWith('https'));
+
       setFormData({
         title: initialData.title || '',
         subtitle: initialData.subtitle || '',
         content: initialData.content || '',
         coverImage: null,
-        imageUrl: initialData.coverImage || '', 
-        useImageUrl: hasExistingImage 
+        imageUrl: initialData.coverImage || '',
+        useImageUrl: hasExistingImage
       });
-      
+
       setRemoveImage(false); // Reset removal state
-      
+
       // Force ImageUpload component to reset
       setKey(prev => prev + 1);
     }
@@ -46,13 +47,13 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name === 'imageUrl') {
       setFormData(prev => ({
         ...prev,
         imageUrl: value,
         useImageUrl: true,
-        coverImage: null  
+        coverImage: null
       }));
       setRemoveImage(false);
     } else {
@@ -61,7 +62,7 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
         [name]: value
       }));
     }
-    
+
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -73,15 +74,15 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
       ...prev,
       coverImage: file,
       useImageUrl: false,
-      imageUrl: ''       
+      imageUrl: ''
     }));
     setRemoveImage(false);
-    
+
     if (errors.coverImage || errors.imageUrl) {
-      setErrors(prev => ({ 
-        ...prev, 
-        coverImage: '', 
-        imageUrl: '' 
+      setErrors(prev => ({
+        ...prev,
+        coverImage: '',
+        imageUrl: ''
       }));
     }
   };
@@ -92,34 +93,34 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
     setFormData(prev => ({
       ...prev,
       useImageUrl: useUrl,
-      ...(useUrl ? { 
+      ...(useUrl ? {
         coverImage: null,
-      } : { 
-        imageUrl: ''     
+      } : {
+        imageUrl: ''
       })
     }));
-    
+
     // Clear errors
     if (errors.coverImage || errors.imageUrl) {
-      setErrors(prev => ({ 
-        ...prev, 
-        coverImage: '', 
-        imageUrl: '' 
+      setErrors(prev => ({
+        ...prev,
+        coverImage: '',
+        imageUrl: ''
       }));
     }
   };
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.title.trim()) {
       newErrors.title = 'Title is required';
     }
-    
+
     if (!formData.content.trim()) {
       newErrors.content = 'Content is required';
     }
-    
+
     // Skip image validation if removing image
     if (!removeImage) {
       // For new posts, require either image upload or URL
@@ -143,7 +144,7 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
         }
       }
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -159,17 +160,17 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     try {
       const formDataToSend = new FormData();
       formDataToSend.append('title', formData.title);
       formDataToSend.append('subtitle', formData.subtitle);
       formDataToSend.append('content', formData.content);
-      
+
       console.log("📤 Submitting form data:");
       console.log("- Title:", formData.title);
       console.log("- Subtitle:", formData.subtitle);
@@ -178,25 +179,25 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
       console.log("- imageUrl:", formData.imageUrl);
       console.log("- coverImage:", formData.coverImage ? `File: ${formData.coverImage.name}` : 'null');
       console.log("- removeImage:", removeImage);
-      
+
       // Handle image upload/update/removal
 
       if (removeImage) {
 
         formDataToSend.append('coverImage', '');
-      
+
       } else if (formData.useImageUrl && formData.imageUrl.trim()) {
 
         // ✅ Send URL under 'imageUrl' — matches what backend destructures
 
         formDataToSend.append('coverImage', formData.imageUrl);  // was 'coverImage'
-      
+
       } else if (formData.coverImage) {
 
         // File upload stays as 'coverImage' — multer reads req.file
 
         formDataToSend.append('coverImage', formData.coverImage);
-      
+
       } else if (isEditing && initialData.coverImage && !formData.coverImage && !removeImage) {
 
         // Keeping existing image — send as 'imageUrl' if it's a URL
@@ -212,16 +213,16 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
         }
 
       }
- 
-      
+
+
       // Log FormData contents
       console.log("FormData entries:");
       for (let [key, value] of formDataToSend.entries()) {
         console.log(`  ${key}:`, value instanceof File ? `File - ${value.name}` : value);
       }
-      
+
       await onSubmit(formDataToSend);
-      
+
     } catch (error) {
       console.error('Error submitting form:', error);
       setErrors(prev => ({
@@ -236,7 +237,7 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
       <h2 className="text-2xl font-bold mb-6">
         {isEditing ? 'Edit Blog Post' : 'Create New Blog Post'}
       </h2>
-      
+
       {/* Debug info for editing */}
       {isEditing && (
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
@@ -248,13 +249,13 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
           </p>
         </div>
       )}
-      
+
       {errors.submit && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
           {errors.submit}
         </div>
       )}
-      
+
       <Input
         label="Title"
         name="title"
@@ -265,7 +266,7 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
         error={errors.title}
         className="mb-4"
       />
-      
+
       <Input
         label="Subtitle"
         name="subtitle"
@@ -274,35 +275,32 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
         placeholder="Enter blog subtitle (optional)"
         className="mb-4"
       />
-      
+
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Content <span className="text-red-500">*</span>
         </label>
-        <textarea
-          name="content"
+        <BlogEditor
           value={formData.content}
-          onChange={handleChange}
-          placeholder="Write your blog content here..."
-          rows="10"
-          className={`
-            w-full px-3 py-2 border rounded-md
-            focus:outline-none focus:ring-2 focus:ring-blue-500
-            ${errors.content ? 'border-red-500' : 'border-gray-300'}
-          `}
+          onChange={(html) =>
+            setFormData((prev) => ({
+              ...prev,
+              content: html,
+            }))
+          }
         />
         {errors.content && (
           <p className="mt-1 text-sm text-red-500">{errors.content}</p>
         )}
       </div>
-      
+
       {/* Image Selection Section */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-4">
           Cover Image <span className="text-red-500">*</span>
           {!isEditing && <span className="text-xs text-gray-500 ml-1">(Required for new posts)</span>}
         </label>
-        
+
         {/* Remove Image Option (Editing only) */}
         {isEditing && initialData.coverImage && !removeImage && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -331,7 +329,7 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
             </div>
           </div>
         )}
-        
+
         {removeImage ? (
           <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <div className="flex items-center">
@@ -364,8 +362,8 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
                 onClick={() => toggleImageOption(false)}
                 className={`
                   flex-1 px-4 py-3 rounded-lg border-2 font-medium transition-all
-                  ${!formData.useImageUrl 
-                    ? 'border-blue-500 bg-blue-50 text-blue-700' 
+                  ${!formData.useImageUrl
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
                     : 'border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100'
                   }
                 `}
@@ -377,14 +375,14 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
                   <span>Upload New Image</span>
                 </div>
               </button>
-              
+
               <button
                 type="button"
                 onClick={() => toggleImageOption(true)}
                 className={`
                   flex-1 px-4 py-3 rounded-lg border-2 font-medium transition-all
-                  ${formData.useImageUrl 
-                    ? 'border-blue-500 bg-blue-50 text-blue-700' 
+                  ${formData.useImageUrl
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
                     : 'border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100'
                   }
                 `}
@@ -397,7 +395,7 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
                 </div>
               </button>
             </div>
-            
+
             {/* Upload Image Option */}
             {!formData.useImageUrl && (
               <div className="space-y-4">
@@ -445,7 +443,7 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
                 </div>
               </div>
             )}
-            
+
             {/* Image URL Option */}
             {formData.useImageUrl && (
               <div className="space-y-4">
@@ -468,7 +466,7 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
                   {errors.imageUrl && (
                     <p className="mt-2 text-sm text-red-500">{errors.imageUrl}</p>
                   )}
-                  
+
                   {/* Show existing image preview when editing */}
                   {isEditing && initialData.coverImage && (
                     <div className="mt-4">
@@ -485,7 +483,7 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
                       </div>
                     </div>
                   )}
-                  
+
                   {/* Show preview for new URLs */}
                   {formData.imageUrl && formData.imageUrl !== initialData.coverImage && (
                     <div className="mt-4">
@@ -508,7 +506,7 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
             )}
           </>
         )}
-        
+
         {/* Helper Text */}
         <p className="mt-4 text-sm text-gray-500">
           {removeImage ? (
@@ -520,7 +518,7 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
           )}
         </p>
       </div>
-      
+
       <div className="flex justify-end space-x-4 mt-8">
         <Button type="submit" className="px-6 py-3">
           {isEditing ? 'Update Post' : 'Create Post'}
@@ -530,5 +528,5 @@ const BlogForm = ({ initialData = {}, onSubmit, isEditing = false }) => {
   );
 };
 
-export default BlogForm; 
+export default BlogForm;
 
