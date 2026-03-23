@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Create axios instance for admin endpoints
 const API = axios.create({
-  baseURL: "https://blogbackend-yq0v.onrender.com/api/admin",
+  baseURL: "https://blogbackend-4jd8.onrender.com/api/admin",
 });
 
 // Add request interceptor to include token for all requests
