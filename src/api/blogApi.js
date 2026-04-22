@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://blogbackend-4jd8.onrender.com/api/post",
+  baseURL: "https://z2yii8g30l.execute-api.ap-south-1.amazonaws.com/default/api/post",
 });
 
 // Add request interceptor to include token for protected routes
@@ -54,7 +54,7 @@ export const deleteBlog = (id) => {
 
 // Simple login function
 export const login = (email, password) => {
-  return axios.post("https://blogbackend-4jd8.onrender.com/api/admin/login", {
+  return axios.post("https://z2yii8g30l.execute-api.ap-south-1.amazonaws.com/default/api/admin/login", {
     email,
     password
   });
