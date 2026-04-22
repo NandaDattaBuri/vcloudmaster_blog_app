@@ -30,9 +30,9 @@ const Login = () => {
     setLoading(true);
 
     try {
-      console.log("Attempting login...");
+      // console.log("Attempting login...");
       const response = await login(formData.email, formData.password);
-      console.log("Login response:", response);
+      // console.log("Login response:", response);
       
       // Check if token was received and stored
       const token = localStorage.getItem("token");
@@ -42,8 +42,8 @@ const Login = () => {
         throw new Error("No token received from server");
       }
       
-      console.log("Login successful! Token:", token.substring(0, 20) + "...");
-      console.log("User data:", user);
+      // console.log("Login successful! Token:", token.substring(0, 20) + "...");
+      // console.log("User data:", user);
       
       navigate('/dashboard');
     } catch (error) {
@@ -187,7 +187,7 @@ const Login = () => {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+                <a href="" className="font-medium text-blue-600 hover:text-blue-500">
                   Forgot your password?
                 </a>
               </div>
