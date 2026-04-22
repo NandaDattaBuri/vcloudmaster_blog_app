@@ -30,11 +30,11 @@ const Dashboard = () => {
   useEffect(() => {
     // Check authentication on component mount
     if (!isAuthenticated()) {
-      console.log("Not authenticated, redirecting to login");
+      // console.log("Not authenticated, redirecting to login");
       navigate('/login');
       return;
     }
-    console.log("User is authenticated, token:", localStorage.getItem("token"));
+    // console.log("User is authenticated, token:", localStorage.getItem("token"));
     fetchBlogs();
   }, [navigate]);
 
