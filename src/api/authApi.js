@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Create axios instance for admin endpoints
 const API = axios.create({
-  baseURL: "https://blogbackend-4jd8.onrender.com/api/admin",
+  baseURL: "https://z2yii8g30l.execute-api.ap-south-1.amazonaws.com/default/api/admin",
 });
 
 // Add request interceptor to include token for all requests
@@ -20,11 +20,11 @@ API.interceptors.request.use(
 // Login User
 export const login = async (email, password) => {
   try {
-    console.log("Attempting login with email:", email);
+    // console.log("Attempting login with email:", email);
     
     const response = await API.post("/login", { email, password });
     
-    console.log("Login response received:", response.data);
+    // console.log("Login response received:", response.data);
     
     // Extract token and user from response
     const token = response.data.token;
@@ -52,7 +52,7 @@ export const login = async (email, password) => {
     if (token) {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
-      console.log("✅ Login successful - Token and user stored");
+      // console.log("✅ Login successful - Token and user stored");
     } else {
       console.error("❌ No token in response");
     }
@@ -84,7 +84,7 @@ export const register = async (formData) => {
     
     const response = await API.post("/register", formData);
     
-    console.log("Registration response:", response.data);
+    // console.log("Registration response:", response.data);
     
     // Extract token and user from response
     const token = response.data.token;
@@ -112,7 +112,7 @@ export const register = async (formData) => {
     if (token) {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
-      console.log("✅ Registration successful - Token and user stored");
+      // console.log("✅ Registration successful - Token and user stored");
     }
     
     // Return consistent format
@@ -139,7 +139,7 @@ export const register = async (formData) => {
 export const logout = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
-  console.log("✅ Logged out");
+  // console.log("✅ Logged out");
 };
 
 // Check if user is authenticated
